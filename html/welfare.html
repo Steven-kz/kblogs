@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js"></script>
+    <style>
+        #container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        html, body {
+            overflow: auto;
+        }
+
+    </style>
+</head>
+
+<body>
+<div id="container">
+</div>
+<script>
+    var container=$("#container");
+    function loadImg() {
+        var url='https://www.mxnzp.com/api/image/girl/list/random?app_id=dcmkvuomtgnqpviq&app_secret=bFdPblVNSFphMytKWG1HU3J0clZpQT09';
+        $.get(url,function(result){
+            //  data : imageUrl
+            for (const pic of result.data) {
+                // 创建
+                var img= $('<img src=""></img>').css({
+                    "width":"600px",
+                    "border": "1px solid #f5f5f5",
+                    "padding":"8px"
+                }).attr("src",pic.imageUrl);
+                //    添加
+                container.append(img);
+            }
+        });
+    }
+
+    // 给窗口绑定滚动监听
+    window.onscroll = function () {
+        let scrollTop = document.documentElement.scrollTop || document.body.scrollTop // 滚动条距离顶部的距离
+        let windowHeight = document.documentElement.clientHeight || document.body.clientHeight // 可视区的高度
+        let scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight //dom元素的高度，包含溢出不可见的内容
+        // 滚动条到底部的条件 scrollHeight <= scrollTop + windowHeight
+        console.log(scrollHeight <= scrollTop + windowHeight)
+        if ((scrollHeight -1) <= scrollTop + windowHeight) {
+            // 滚动到底部，重新加载图片
+            loadImg();
+        }
+    }
+
+    $(function () {
+        // 页面DOM加载完毕后，直接调用加载图片
+        loadImg();
+    });
+</script>
+</body>
+
+</html>
