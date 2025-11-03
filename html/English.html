@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语单词点击播放</title>
+<!--    <style>-->
+<!--        body {-->
+<!--            background-image: url("../bg.svg"); /* 替换为您自己的 SVG 图像路径 */-->
+<!--            background-size: cover;-->
+<!--            background-repeat: no-repeat;-->
+<!--            background-position: center;-->
+<!--        }-->
+<!--    </style>-->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+
+        li:hover {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+
+        .word {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .description {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .play-icon {
+            color: #007bff;
+            font-size: 18px;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+        }
+
+        .search-button {
+            margin-left: 10px;
+            padding: 8px 15px;
+            font-size: 14px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        #translation-result {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 3px;
+            font-size: 16px;
+            color: #f85555;
+        }
+    </style>
+</head>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js"></script>
+
+<body>
+<div class="container">
+    <h1>English</h1>
+    <div class="search-container">
+        <input type="text" id="word-input" onkeydown="handleKeyPress(event)" class="search-input" placeholder="如没有您需要的单词，请输入单词朗读">
+        <button onclick="searchWord()" class="search-button">朗读</button>
+    </div>
+    <div id="translation-result"></div> <!-- 用于展示翻译结果的元素 -->
+    <ul id="word-list">
+        <li onclick="playAudio('Patterns')">
+            <div>
+                <span class="word">Patterns</span>
+                <span class="play-icon">&#9658;</span>
+            </div>
+            <span class="description">模式</span>
+        </li>
+        <li onclick="playAudio('Discover')">
+            <div>
+                <span class="word">Discover</span>
+                <span class="play-icon">&#9658;</span>
+            </div>
+            <span class="description">发现</span>
+        </li>
+        <li onclick="playAudio('Client')">
+            <div>
+                <span class="word">Client</span>
+                <span class="play-icon">&#9658;</span>
+            </div>
+            <span class="description">客户</span>
+        </li>
+        <li onclick="playAudio('Bulk')">
+            <div>
+                <span class="word">Bulk</span>
+                <span class="play-icon">&#9658;</span>
+            </div>
+            <span class="description">主体</span>
+        </li>
+        <li onclick="playAudio('Source')">
+            <div>
+                <span class="word">Source</span>
+                <span class="play-icon">&#9658;</span>
+            </div>
+            <span class="description">来源</span>
+        </li>
+    </ul>
+</div>
+
+<script>
+    function playAudio(word) {
+        var audio = new Audio();
+        // audio.src = 'https://dict.youdao.com/speech?audio=' + word + '.mp3';
+        audio.src = 'https://dict.youdao.com/speech?audio=' + word;
+        audio.play();
+    }
+
+    //搜索
+    function searchWord() {
+        var input = document.getElementById('word-input');
+        var word = input.value.trim();
+        var translation = translateWordToChinese(word);
+
+        if (word !== '') {
+            if (!isChinese(word)) {
+                playAudio(word)
+            }
+        }
+    }
+
+    //判断是否是中文
+    function isChinese(str) {
+        return /^[\u4e00-\u9fa5]+$/.test(str);
+    }
+
+    //回车
+    function handleKeyPress(event) {
+        if (event.keyCode === 13) { // 按下的是回车键
+            event.preventDefault(); // 阻止表单提交
+            searchWord()
+        }
+    }
+
+
+       //访问个人服务器 翻译
+        function translateWordToChinese(word) {
+            var url = 'http://152.136.175.235:8999/mes/external/blog/fanyi?word=' + word;
+            try {
+                $.get(url, function (result) {
+                    var text = "翻译结果: " + result.data;
+                    console.log(text);
+                    var translationResult = document.getElementById('translation-result');
+                    translationResult.innerText = text;
+                    if (isChinese(word)) {
+                        playAudio(result.data)
+                    }
+                });
+            } catch (error) {
+                console.error("出现错误: " + error);
+                throw error;
+            }
+        }
+
+    // TODO 此接口跨域
+    // function translateWordToChinese(word) {
+    //     var url = 'https://fanyi.youdao.com/translate?&doctype=json&type=AUTO&i=' + word;
+    //     try {
+    //         $.get(url, function (result) {
+    //             var text = "翻译结果: " + result.translateResult[0][0].tgt;
+    //             console.log(text);
+    //             var translationResult = document.getElementById('translation-result');
+    //             translationResult.innerText = text;
+    //             if (isChinese(word)) {
+    //                 playAudio(result.translateResult[0][0].tgt)
+    //             }
+    //         });
+    //     } catch (error) {
+    //         console.error("出现错误: " + error);
+    //         throw error;
+    //     }
+    // }
+
+
+</script>
+</body>
+</html>

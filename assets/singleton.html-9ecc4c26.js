@@ -1,0 +1,32 @@
+import{_ as n,o as s,c as a,f as e}from"./app-314de074.js";const t={},p=e(`<h1 id="单例模式" tabindex="-1"><a class="header-anchor" href="#单例模式" aria-hidden="true">#</a> 单例模式</h1><p>单例模式是一种创建型设计模式，它确保只有一个类的实例存在，并提供全局访问点。<br>在 Java 中，实现单例模式通常使用以下两种方式：<br>饿汉式：坏处:对象加载时间过长。好处:饿汉式是线程安全的。<br>懒汉式：好处:延迟对象的创建。坏处:目前的写法，会线程不安全。饿汉式单例模式饿汉式单例模式在类加载时就实例化一个对象，并将其保存在静态变量中，这样在之后的代码中就可以直接使用该实例</p><div class="language-java line-numbers-mode" data-ext="java"><pre class="language-java"><code><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Singleton</span> <span class="token punctuation">{</span>
+
+    <span class="token comment">// 在类加载时就实例化一个对象</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">Singleton</span> instance <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Singleton</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 私有化构造函数，以防止其他代码创建实例</span>
+    <span class="token keyword">private</span> <span class="token class-name">Singleton</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+    <span class="token comment">// 对外暴露获取实例的静态方法</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">Singleton</span> <span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> instance<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><ol><li><strong>懒汉式单例模式</strong></li></ol><p>懒汉式单例模式在首次调用获取实例方法时才进行实例化，并将其保存在静态变量中，以便后续使用。以下是示例代码：</p><div class="language-java line-numbers-mode" data-ext="java"><pre class="language-java"><code><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Singleton</span> <span class="token punctuation">{</span>
+
+    <span class="token comment">// 使用 volatile 修饰 instance 变量，以确保多线程下的可见性和正确性</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">volatile</span> <span class="token class-name">Singleton</span> instance<span class="token punctuation">;</span>
+
+    <span class="token keyword">private</span> <span class="token class-name">Singleton</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">Singleton</span> <span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>instance <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 如果实例未被实例化，则进行实例化并赋值给 instance 变量</span>
+            <span class="token keyword">synchronized</span> <span class="token punctuation">(</span><span class="token class-name">Singleton</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 使用 synchronized 关键字实现多线程下的线程安全</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>instance <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    instance <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Singleton</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> instance<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>双重检查锁（Double Checked Locking）是一种常用的多线程编程技术，其主要用途是在保证线程安全的同时尽量减少锁的使用，从而提高程序性能。<br>双重检查锁之所以能够提高程序性能，是因为它能够减少锁的使用次数。在对共享资源进行访问时，加锁和解锁操作是非常耗费时间的，而使用双重检查锁可以在不必要的情况下避免加锁和解锁操作，从而提高程序的执行效率。<br>需要注意的是，双重检查锁在实现时需要注意线程安全问题。由于指令重排的原因，如果不使用 volatile 关键字修饰共享变量 instance，可能会出现多个线程同时访问 instance 导致实例化多个对象的情况。因此，在使用双重检查锁模式时，需要使用 volatile 关键字来保证线程安全性。</p>`,7),c=[p];function l(o,i){return s(),a("div",null,c)}const d=n(t,[["render",l],["__file","singleton.html.vue"]]);export{d as default};

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>温馨消息弹窗</title>
+    <style>
+        export default {
+        data() {
+            return {
+                showTip: true
+            }
+        },
+        mounted() {
+        setTimeout(() => {
+            this.showTip = false
+        }, 1000)
+        }
+        }
+         .click-tip {
+             position: fixed;
+             top: 50%;
+             left: 50%;
+             transform: translate(-50%, -50%);
+             z-index: 1000;
+             pointer-events: none;
+         }
+
+        .tip-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2),
+            0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .sparkle-icon {
+            width: 24px;
+            height: 24px;
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        .tip-text {
+            font-size: 16px;
+            font-weight: 500;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+        }
+
+        .fade-enter-active, .fade-leave-active {
+            transition: all 0.5s ease;
+        }
+
+        .fade-enter-from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+        }
+
+        .fade-leave-to {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #000000 0%, #000000 100%);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .message-window {
+            position: absolute;
+            border-radius: 12px;
+            padding: 12px 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            backdrop-filter: blur(5px);
+            max-width: 90vw;
+            word-break: break-word;
+            z-index: 10;
+        }
+
+        .message-content {
+            font-size: clamp(14px, 4vw, 16px);
+            font-weight: 500;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 3px;
+            right: 6px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: rgba(0,0,0,0.5);
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+            z-index: 20;
+        }
+
+        .close-btn:hover, .close-btn:active {
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 480px) {
+            .message-window {
+                padding: 10px 14px;
+                border-radius: 10px;
+            }
+
+            .close-btn {
+                top: 2px;
+                right: 4px;
+                font-size: 14px;
+                width: 18px;
+                height: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="container"></div>
+
+
+<!-- 提示框 -->
+<div id="clickTip" class="click-tip tip-initial">
+    <div class="tip-content">
+        <!-- 内联SVG星星图标 -->
+        <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                  fill="url(#gradient)" stroke="url(#gradient)" stroke-width="1"/>
+            <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="50%" y2="50%">
+                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+        </svg>
+        <span class="tip-text">点击增加氛围Music</span>
+    </div>
+</div>
+<audio id="background-music" src="/kblogs/music/1.MP3" loop></audio>
+
+<script>
+    const music = document.getElementById('background-music');
+    let musicStarted = false;
+
+    document.addEventListener('click', () => {
+        if (!musicStarted) {
+            music.play();
+            musicStarted = true;
+        }
+    }, { once: true }); // 只在第一次点击时触发
+</script>
+
+<script>
+    // 等待DOM加载完成
+    document.addEventListener('DOMContentLoaded', function() {
+        const tipElement = document.getElementById('clickTip');
+
+        // 触发进入动画
+        setTimeout(() => {
+            tipElement.classList.remove('tip-initial');
+            tipElement.classList.add('tip-show');
+        }, 100); // 稍微延迟，确保动画流畅
+
+        // 1秒后触发离开动画
+        setTimeout(() => {
+            tipElement.classList.remove('tip-show');
+            tipElement.classList.add('tip-hide');
+
+            // 动画结束后从DOM中移除（可选）
+            setTimeout(() => {
+                tipElement.remove();
+            }, 500); // 与CSS transition时间一致
+        }, 1000);
+    });
+    // 消息数据
+    const MESSAGES = {
+        "一般": [
+            "梦想成真", "保持好心情", "早点休息", "每天都要元气满满", "多喝水哦~",
+            "金榜题名", "今天过得开心", "记得吃水果", "别熬夜", "天凉了，多穿衣服",
+            "愿所有烦恼都消失", "好好爱自己", "顺顺利利", "期待下一次见面", "想你了",
+            "注意休息", "照顾好自己"
+        ],
+        "家人": [
+            "爸妈永远爱你", "家里一切都好", "记得常回家看看", "家是永远的港湾",
+            "家人永远支持你", "妈妈做了你爱吃的菜", "家人想念你", "记得打电话给爸妈",
+            "一家人最重要的是健康", "家人的爱是最温暖的"
+        ],
+        "恋人": [
+            "你是我最大的幸福", "想你的每一天", "你的笑容真美", "永远爱你",
+            "你是我生命中的阳光", "今天也很想你", "和你在一起的时光最珍贵",
+            "你今天辛苦了", "你是我的全世界", "做个甜甜的梦"
+        ],
+        "朋友": [
+            "有空一起喝一杯", "谢谢你一直的陪伴", "朋友一生一起走", "真高兴认识你",
+            "友谊长存", "你的朋友永远支持你", "朋友间无需客气", "你是值得骄傲的人",
+            "为你加油", "你永远不是一个人"
+        ],
+        "鼓励": [
+            "相信自己，你可以的！", "今天的付出，明天会有收获", "坚持就是胜利",
+            "你比想象中更强大", "困难只是暂时的", "不要放弃，继续努力",
+            "勇敢面对挑战", "每一步都是进步", "你的努力不会白费", "成功就在前方等着你"
+        ]
+    };
+
+    // 颜色数据
+    const COLORS = {
+        "一般": ["#FFB6C1", "#E6E6FA", "#FFDAB9"],
+        "家人": ["#98FB98", "#90EE90", "#7FFFD4"],
+        "恋人": ["#FFC0CB", "#FFB6C1", "#FF69B4"],
+        "朋友": ["#87CEFA", "#ADD8E6", "#B0E0E6"],
+        "鼓励": ["#FFD700", "#FFFF00", "#FFA07A"]
+    };
+
+    // 装饰字符
+    const DECORATIONS = ["♥", "♡", "✿", "❀", "✨", "☆", "✺", "❤", "♬", "☀", "☺", "♪"];
+
+    const container = document.getElementById('container');
+    const windows = [];
+    let running = true;
+    let windowCount = 0;
+    const maxWindows = 66;
+
+    // 屏幕尺寸适配
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const baseWidth = isMobile ? 100 : 120;
+    const baseHeight = isMobile ? 35 : 45;
+
+    // 网格系统 - 用于均匀分布
+    let grid = [];
+    const gridCols = isMobile ? 5 : 7;
+    const gridRows = isMobile ? 8 : 10;
+    let cellWidth, cellHeight;
+
+    // 初始化网格
+    function initGrid() {
+        grid = [];
+        cellWidth = window.innerWidth / gridCols;
+        cellHeight = window.innerHeight / gridRows;
+
+        for (let row = 0; row < gridRows; row++) {
+            for (let col = 0; col < gridCols; col++) {
+                grid.push({
+                    row: row,
+                    col: col,
+                    occupied: false
+                });
+            }
+        }
+
+        // 打乱网格顺序，使分布看起来更自然
+        shuffleArray(grid);
+    }
+
+    // 打乱数组
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // 获取可用网格位置
+    function getAvailableGridPosition() {
+        for (let i = 0; i < grid.length; i++) {
+            if (!grid[i].occupied) {
+                grid[i].occupied = true;
+                return {
+                    x: grid[i].col * cellWidth + Math.random() * (cellWidth - baseWidth - 10),
+                    y: grid[i].row * cellHeight + Math.random() * (cellHeight - baseHeight - 10)
+                };
+            }
+        }
+        // 如果没有可用网格，返回随机位置
+        return {
+            x: Math.random() * (window.innerWidth - baseWidth - 20),
+            y: Math.random() * (window.innerHeight - baseHeight - 20)
+        };
+    }
+
+    // 创建窗口
+    function createWindow() {
+        if (!running || windowCount >= maxWindows) return;
+
+        const width = baseWidth + Math.floor(Math.random() * 40);
+        const height = baseHeight + Math.floor(Math.random() * 25);
+
+        // 使用网格系统获取更均匀的位置
+        const position = getAvailableGridPosition();
+        const x = Math.max(5, position.x);
+        const y = Math.max(5, position.y);
+
+        // 随机选择消息类别和内容
+        const categories = Object.keys(MESSAGES);
+        const category = categories[Math.floor(Math.random() * categories.length)];
+        const categoryMessages = MESSAGES[category];
+        const baseMessage = categoryMessages[Math.floor(Math.random() * categoryMessages.length)];
+
+        // 添加装饰
+        let message;
+        if (Math.random() > 0.5) {
+            const prefix = DECORATIONS[Math.floor(Math.random() * DECORATIONS.length)] + " ";
+            const suffix = " " + DECORATIONS[Math.floor(Math.random() * DECORATIONS.length)];
+            message = prefix + baseMessage + suffix;
+        } else {
+            message = baseMessage;
+        }
+
+        // 选择背景颜色
+        const categoryColors = COLORS[category];
+        const bgColor = categoryColors[Math.floor(Math.random() * categoryColors.length)];
+
+        // 创建窗口元素
+        const windowElement = document.createElement('div');
+        windowElement.className = 'message-window';
+        windowElement.style.width = width + 'px';
+        windowElement.style.height = 'auto';
+        windowElement.style.left = x + 'px';
+        windowElement.style.top = y + 'px';
+        windowElement.style.backgroundColor = bgColor;
+
+        // 添加内容
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        content.textContent = message;
+        windowElement.appendChild(content);
+
+        // 添加关闭按钮
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'close-btn';
+        closeBtn.textContent = '×';
+        closeBtn.setAttribute('aria-label', '关闭');
+        closeBtn.onclick = function(e) {
+            e.stopPropagation();
+            closeWindow(windowElement);
+        };
+        windowElement.appendChild(closeBtn);
+
+        // 点击窗口关闭所有
+        windowElement.onclick = closeAll;
+
+        container.appendChild(windowElement);
+        windows.push(windowElement);
+        windowCount++;
+
+        // 淡入效果
+        setTimeout(() => {
+            windowElement.style.opacity = '1';
+        }, 10);
+
+        // 随机动画
+        if (Math.random() > 0.7) {
+            startPulseAnimation(windowElement);
+        }
+        if (Math.random() > 0.8) {
+            startFloatAnimation(windowElement, x, y);
+        }
+    }
+
+    // 关闭单个窗口
+    function closeWindow(windowElement) {
+        windowElement.style.opacity = '0';
+        setTimeout(() => {
+            if (windowElement.parentNode) {
+                windowElement.parentNode.removeChild(windowElement);
+            }
+            const index = windows.indexOf(windowElement);
+            if (index > -1) {
+                windows.splice(index, 1);
+                windowCount--;
+
+                // 释放网格位置
+                const x = parseInt(windowElement.style.left);
+                const y = parseInt(windowElement.style.top);
+                const col = Math.floor(x / cellWidth);
+                const row = Math.floor(y / cellHeight);
+
+                if (col >= 0 && col < gridCols && row >= 0 && row < gridRows) {
+                    const gridIndex = row * gridCols + col;
+                    if (gridIndex < grid.length) {
+                        grid[gridIndex].occupied = false;
+                    }
+                }
+            }
+        }, 300);
+    }
+
+    // 脉冲动画
+    function startPulseAnimation(element) {
+        let step = 0;
+        const maxCycles = 15;
+        let cycle = 0;
+        const baseFontSize = parseInt(getComputedStyle(element.querySelector('.message-content')).fontSize);
+
+        function pulse() {
+            if (cycle >= maxCycles || !running) return;
+
+            const factor = 1 + 0.03 * Math.sin(step / 3);
+            element.querySelector('.message-content').style.fontSize = (baseFontSize * factor) + 'px';
+
+            step = (step + 1) % 20;
+            if (step === 0) cycle++;
+
+            setTimeout(pulse, 100);
+        }
+        pulse();
+    }
+
+    // 浮动动画
+    function startFloatAnimation(element, startX, startY) {
+        let step = 0;
+        const maxCycles = 15;
+        let cycle = 0;
+
+        function float() {
+            if (cycle >= maxCycles || !running) return;
+
+            const dx = 3 * Math.sin(step / 5);
+            const dy = 3 * Math.sin(step / 7);
+            element.style.left = (startX + dx) + 'px';
+            element.style.top = (startY + dy) + 'px';
+
+            step = (step + 1) % 40;
+            if (step === 0) cycle++;
+
+            setTimeout(float, 50);
+        }
+        float();
+    }
+
+    // 关闭所有窗口
+    function closeAll() {
+        running = false;
+        windows.forEach(window => {
+            window.style.opacity = '0';
+            setTimeout(() => {
+                if (window.parentNode) {
+                    window.parentNode.removeChild(window);
+                }
+            }, 300);
+        });
+        windows.length = 0;
+        windowCount = 0;
+
+        // 重置网格
+        initGrid();
+
+        // 显示重启提示
+        setTimeout(() => {
+            const restartMsg = document.createElement('div');
+            restartMsg.className = 'message-window';
+            restartMsg.style.left = '50%';
+            restartMsg.style.top = '50%';
+            restartMsg.style.transform = 'translate(-50%, -50%)';
+            restartMsg.style.backgroundColor = '#FFD700';
+            restartMsg.style.zIndex = '100';
+            restartMsg.style.opacity = '1';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = '点击屏幕重新开始';
+            restartMsg.appendChild(content);
+
+            restartMsg.onclick = function() {
+                container.removeChild(restartMsg);
+                running = true;
+                windowCount = 0;
+                createInitialWindows();
+                setTimeout(startContinuousPopup, 2000);
+            };
+
+            container.appendChild(restartMsg);
+        }, 500);
+    }
+
+    // 初始创建窗口
+    function createInitialWindows() {
+        const initialCount = isMobile ? 20 : 30;
+        for (let i = 0; i < initialCount && running; i++) {
+            setTimeout(() => createWindow(), i * 50);
+        }
+    }
+
+    // 持续弹窗
+    function startContinuousPopup() {
+        const interval = setInterval(() => {
+            if (running && windowCount < maxWindows) {
+                createWindow();
+            } else if (!running) {
+                clearInterval(interval);
+            }
+        }, 500);
+    }
+
+    // 启动
+    initGrid(); // 初始化网格系统
+    createInitialWindows();
+    setTimeout(startContinuousPopup, 2000);
+
+    // ESC键退出
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAll();
+        }
+    });
+
+    // 触摸事件支持
+    document.addEventListener('touchstart', function(e) {
+        if (e.touches.length > 2) {
+            closeAll();
+        }
+    });
+
+    // 响应窗口大小变化
+    window.addEventListener('resize', function() {
+        // 重新初始化网格
+        initGrid();
+
+        // 重新调整窗口位置
+        windows.forEach((window) => {
+            const position = getAvailableGridPosition();
+            const x = Math.max(5, position.x);
+            const y = Math.max(5, position.y);
+            window.style.left = x + 'px';
+            window.style.top = y + 'px';
+        });
+    });
+</script>
+</body>
+</html>
